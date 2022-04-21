@@ -3,6 +3,8 @@ import traceback
 import pygame
 import sys, os
 
+print<("bla")
+
 class Display():
     def __init__(self, game):
         pygame.init()
