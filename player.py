@@ -37,3 +37,5 @@ if __name__=="__main__":
         port = int(sys.argv[2])
 
     main(ip_address, port)
+
+    print('test')
