@@ -4,13 +4,13 @@ pygame.init()
 
 WIDTH = 600
 HEIGHT = 600
-LINE_WIDTH = 15
-WIN_LINE_WIDTH = 15
+LINE_WIDTH = 10
+WIN_LINE_WIDTH = 5
 BOARD_ROWS = 10
 BOARD_COLS = 10
 SQUARE_SIZE = 60
 CIRCLE_RADIUS = 20
-CIRCLE_WIDTH = 15
+CIRCLE_WIDTH = 5
 CROSS_WIDTH = 5
 SPACE = 55
 
@@ -66,15 +66,18 @@ def check_win(player):
 			if board[row][i] == player and board[row][i+1] == player and board[row][i+2] == player and board[row][i+3] == player and board[row][i+4] == player:
 				draw_horizontal_winning_line(row, i, player)
 				return True
-
-	if board[2][0] == player and board[1][1] == player and board[0][2] == player:
-		draw_asc_diagonal(player)
-		return True
-
-	if board[0][0] == player and board[1][1] == player and board[2][2] == player:
-		draw_desc_diagonal(player)
-		return True
-
+	for i in range(0,6):
+		for j in range(0,6):
+			if board[i,j]==player and board[i+1][j+1] == player and board[i+2][j+2] == player and board[i+3][j+3] == player and board[i+4][j+4] == player:
+				draw_desc_diagonal(player, i, j)
+				return True
+	
+	for i in range(4,10):
+		for j in range(0,6):
+			if board[i,j]==player and board[i-1,j+1]==player and board[i-2,j+2]==player and board[i-3,j+3]==player and board[i-4,j+4]==player:
+				draw_asc_diagonal(player, i, j)
+				return True
+	
 	return False
 	
 def draw_vertical_winning_line(col, i, player):
@@ -85,7 +88,7 @@ def draw_vertical_winning_line(col, i, player):
 	elif player == 2:
 		color = CROSS_COLOR
 
-	pygame.draw.line( screen, color, (posX, 15+i*SQUARE_SIZE), (posX, HEIGHT//2 - 15+i*SQUARE_SIZE), LINE_WIDTH )
+	pygame.draw.line( screen, color, (posX, 15+i*SQUARE_SIZE), (posX, HEIGHT//2 - 15+i*SQUARE_SIZE), WIN_LINE_WIDTH )
 
 def draw_horizontal_winning_line(row, i, player):
 	posY = row * SQUARE_SIZE + SQUARE_SIZE//2
@@ -97,21 +100,21 @@ def draw_horizontal_winning_line(row, i, player):
 
 	pygame.draw.line( screen, color, (15+i*SQUARE_SIZE, posY), (WIDTH//2 - 15+i*SQUARE_SIZE, posY), WIN_LINE_WIDTH )
 
-def draw_asc_diagonal(player,):
+def draw_asc_diagonal(player, i, j):
 	if player == 1:
 		color = CIRCLE_COLOR
 	elif player == 2:
 		color = CROSS_COLOR
 
-	pygame.draw.line( screen, color, (15, HEIGHT - 15), (WIDTH - 15, 15), WIN_LINE_WIDTH )
+	pygame.draw.line( screen, color, (15+j*SQUARE_SIZE, HEIGHT//2 - 15+i*SQUARE_SIZE), (WIDTH//2 - 15+j*SQUARE_SIZE, 15+j*SQUARE_SIZE), WIN_LINE_WIDTH )
 
-def draw_desc_diagonal(player):
+def draw_desc_diagonal(player, i, j):
 	if player == 1:
 		color = CIRCLE_COLOR
 	elif player == 2:
 		color = CROSS_COLOR
 
-	pygame.draw.line( screen, color, (15, 15), (WIDTH - 15, HEIGHT - 15), WIN_LINE_WIDTH )
+	pygame.draw.line( screen, color, (15+j*SQUARE_SIZE, 15+i*SQUARE_SIZE), (WIDTH//2 - 15+j*SQUARE_SIZE, HEIGHT//2 - 15+i*SQUARE_SIZE), WIN_LINE_WIDTH )
 
 def restart():
 	screen.fill( BG_COLOR )
