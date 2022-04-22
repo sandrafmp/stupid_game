@@ -2,6 +2,61 @@ from multiprocessing import Process, Manager, Value, Lock
 from multiprocessing.connection import Listener
 import traceback
 import sys
+import pygame
+
+
+black = (0, 0, 0)
+white = (255, 255, 255)
+
+green = (0, 255, 0)
+blue = (0, 0, 255)
+WIDTH = 20
+HEIGHT = 20
+MARGIN = 5
+
+
+def grid():
+    grid = []
+    for row in range(20):
+        grid.append([])
+        for column in range(20):
+            grid[row].append(0)
+    grid[1][5] = 0
+    window_size = [505, 505]
+
+class Game():
+    def __init__(self):
+        self.grid = grid()
+        self.score = [0, 0]
+        self.running = True
+        self.players = [Player(i) for i in range(2)]
+
+
+
+class Display():
+    def __init__(self, window_size):
+        self.screen = pygame.display.set_mode(window_size)
+        self.clock = pygame.time.Clock() #frames per second
+        pygame.init()
+
+    def analyze_events(self, player):
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            column = pos[0] // (WIDTH + MARGIN)
+            row = pos[1] // (HEIGHT + MARGIN)
+            grid[row][column] = 1
+
+        events = []
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.key == pygame.K_ESCAPE:
+                events.append("quit")
+                
+        if pygame.sprite.collide_rect(self.ball, self.paddles[side]):
+            events.append("collide")
+        return events
+
 
 FIRST_PLAYER = 0
 SECOND_PLAYER = 1
