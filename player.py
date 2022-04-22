@@ -10,27 +10,14 @@ class Display():
     def analyze_events(self, side):
         events = []
         for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				sys.exit()
-
-			if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-
-				mouseX = event.pos[0] 
-				mouseY = event.pos[1] 
-
-				clicked_row = int(mouseY // SQUARE_SIZE)
-				clicked_col = int(mouseX // SQUARE_SIZE)
-
-				if available_square( clicked_row, clicked_col ):
-
-					mark_square( clicked_row, clicked_col, player )
-					if check_win( player ):
-						game_over = True
-					player = player % 2 + 1
-
-					draw_figures()
-					
-		return events
+        	if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
+        		events.append("square clicked")
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    events.append("restart")
+            elif event.type == pygame.QUIT:
+                events.append("quit")
+        return events
 					
 
     def refresh(self):
