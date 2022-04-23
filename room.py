@@ -23,11 +23,15 @@ BLUE = (0, 0, 255)
 YELLOW = (255,255,0)
 GREEN = (0,255,0)
 
+class Board():
+	def __init__(self,dimension)
+		self.grid = []
 
 class Game():
     def __init__(self, manager):
         self.players = manager.list([Player(LEFT_PLAYER), Player(RIGHT_PLAYER)])
         self.running = Value('i', 1)  # 1 running
+        self.board = manager.list(Board())
         self.lock = Lock()
 
 
@@ -40,6 +44,7 @@ class Game():
     def get_info(self):
         info = { #info who board looks now
             'is_running': self.running.value == 1
+            'board': self.board
         }
         return info
 
@@ -48,15 +53,15 @@ class Game():
 
     def is_running(self):
         return self.running.value == 1
+        
+    def change_color(self, player, command1, command2):
+		self.board[command1][command2]=player+1
 
 
 
 class Player():
     def __init__(self, turn):
         self.turn = turn
-
-
-
 
 
 def player(turn, conn, game):

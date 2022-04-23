@@ -41,7 +41,6 @@ class Player():
 
 class Board():
     def __init__(self, game):
-        self.game = game
         self.grid = []
         self.scr = pygame.display.set_mode(SIZE)
 
@@ -71,23 +70,31 @@ class Board():
         return events
 
 
-    def change_color(self, turn, row, column):
-        if turn == 0:
-            color = BLUE
-        elif turn == 1:
-            color = GREEN
-        pygame.draw.rect(self.scr,
+    def change_color(self): #
+    	for i in range(20):
+    		for j in range(20):
+    			if self.grid[i][j]==1:
+    				color=BLUE
+    				pygame.draw.rect(self.scr,
                          color,
                          [(MARGIN + WIDTH) * column + MARGIN,
                           (MARGIN + HEIGHT) * row + MARGIN,
                           WIDTH,
                           HEIGHT])
-
+                if self.grid[i][j]==2:
+    				color=BLUE
+    				pygame.draw.rect(self.scr,
+                         color,
+                         [(MARGIN + WIDTH) * column + MARGIN,
+                          (MARGIN + HEIGHT) * row + MARGIN,
+                          WIDTH,
+                          HEIGHT])
+                          
         # clock.tick(50)
         pygame.display.flip()
 
-    def update(self, turn, row, column):
-        self.change_color(turn, row, column)
+    def update(self):
+        self.change_color()
 
     def refresh_board(self):
         pygame.display.update()
@@ -99,15 +106,21 @@ class Board():
 class Game():
     def __init__(self):
         self.running = True
+        self.board = Board()
 
     def get_player(self, turn):
         return self.players[turn]
 
     def update(self, gameinfo):
         self.running = gameinfo['is_running']
+        self.board = self.up_board(gameinfo['board'])
 
-
-
+	def up_board(self,info):
+		for i in range(20):
+			for j in range(20):
+				self.board.grid[i][j]=sala[i][j]
+		self.board.change_color()
+		
     def is_running(self):
         return self.running
 
@@ -118,11 +131,11 @@ class Game():
 def main (ip_address, port):
     try:
         with Client((ip_address, port), authkey=b'secret password') as conn:
-            game = Game()
+            display = Board()
+            game = Game(display)
             turn, gameinfo = conn.recv()
             print(f"I am playing {SIDESSTR[turn]}")
             game.update(gameinfo)
-            display = Board(game)
             while game.is_running():
                 events = display.analyze_events(turn)
                 for ev in events:
@@ -144,7 +157,7 @@ def main (ip_address, port):
 
 if __name__=="__main__":
     port = 24654
-    ip_address = "127.0.0.1"
+    ip_address = "147.96.81.245"
     if len(sys.argv)>1:
         ip_address = sys.argv[1]
     if len(sys.argv) > 2:
