@@ -3,76 +3,144 @@ import traceback
 import pygame
 import sys, os
 
-WIDTH = 600
-HEIGHT = 600
-LINE_WIDTH = 10
-WIN_LINE_WIDTH = 5
-BOARD_ROWS = 10
-BOARD_COLS = 10
-SQUARE_SIZE = 60
-CIRCLE_RADIUS = 20
-CIRCLE_WIDTH = 5
-CROSS_WIDTH = 5
-SPACE = 55
 
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 RED = (255, 0, 0)
-BG_COLOR = (20, 200, 160)
-LINE_COLOR = (23, 145, 135)
-CIRCLE_COLOR = (239, 231, 200)
-CROSS_COLOR = (66, 66, 66)
+BLUE = (0, 0, 255)
+YELLOW = (255,255,0)
+GREEN = (0,255,0)
+X = 0
+Y = 1
+SIZE = (505, 505)
+grid = []
+
+LEFT_PLAYER = 0
+RIGHT_PLAYER = 1
+PLAYER_COLOR = [GREEN, YELLOW]
+PLAYER_HEIGHT = 60
+PLAYER_WIDTH = 10
+
+BALL_COLOR = WHITE
+BALL_SIZE = 10
+FPS = 60
+
+WIDTH = 20
+HEIGHT = 20
+MARGIN = 5
+
+SIDES = ["one", "two"]
+SIDESSTR = ["one", "two"]
 
 
-class Display():
+
+class Player():
+    def __init__(self, turn): #turn är side
+        self.turn = turn
+
+
+class Board():
     def __init__(self, game):
+        self.game = game
+        self.grid = []
+        self.scr = pygame.display.set_mode(SIZE)
+
+        for row in range(20):
+            self.grid.append([])
+            for column in range(20):
+                self.grid[row].append(0)
+                color = WHITE
+                pygame.draw.rect(self.scr,
+                                 color,
+                                 [(MARGIN + WIDTH) * column + MARGIN,
+                                  (MARGIN + HEIGHT) * row + MARGIN,
+                                  WIDTH,
+                                  HEIGHT])
+        pygame.display.flip()
+        self.clock =  pygame.time.Clock()  #FPS
         pygame.init()
 
-    def analyze_events(self, side):
+    def analyze_events(self, turn):   #vi ska inte ändra planen i player utan endast skicka info till room
         events = []
         for event in pygame.event.get():
-        	if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-        		events.append("click")
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:
-                    events.append("restart")
-            elif event.type == pygame.QUIT:
-                events.append("quit")
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                column = pos[0] // (WIDTH + MARGIN)
+                row = pos[1] // (HEIGHT + MARGIN)
+                events.append(["color", row, column])
         return events
-					
 
-    def refresh(self):
+
+    def change_color(self, turn, row, column):
+        if turn == 0:
+            color = BLUE
+        elif turn == 1:
+            color = GREEN
+        pygame.draw.rect(self.scr,
+                         color,
+                         [(MARGIN + WIDTH) * column + MARGIN,
+                          (MARGIN + HEIGHT) * row + MARGIN,
+                          WIDTH,
+                          HEIGHT])
+
+        # clock.tick(50)
+        pygame.display.flip()
+
+    def update(self, turn, row, column):
+        self.change_color(turn, row, column)
+
+    def refresh_board(self):
+        pygame.display.update()
 
     def tick(self):
         self.clock.tick(FPS)
 
-    @staticmethod
-    def quit():
-        pygame.quit()
+
+class Game():
+    def __init__(self):
+        self.running = True
+
+    def get_player(self, turn):
+        return self.players[turn]
+
+    def update(self, gameinfo):
+        self.running = gameinfo['is_running']
 
 
-def main(ip_address, port):
+
+    def is_running(self):
+        return self.running
+
+
+
+
+
+def main (ip_address, port):
     try:
         with Client((ip_address, port), authkey=b'secret password') as conn:
             game = Game()
-            side,gameinfo = conn.recv()
-            print(f"I am playing {SIDESSTR[side]}")
+            turn, gameinfo = conn.recv()
+            print(f"I am playing {SIDESSTR[turn]}")
             game.update(gameinfo)
-            display = Display(game)
+            display = Board(game)
             while game.is_running():
-                events = display.analyze_events(side)
+                events = display.analyze_events(turn)
                 for ev in events:
+                    print(turn)
+                    display.change_color(turn,ev[1],ev[2]) #DETTA SKA GÖRAS FÖR BÅDA, SÅ I RUM KANSKE? HAR PROVAT
                     conn.send(ev)
-                    if ev == 'quit':
+                    if ev[0] == 'quit':
                         game.stop()
                 conn.send("next")
                 gameinfo = conn.recv()
                 game.update(gameinfo)
-                display.refresh()
+                display.refresh_board()
                 display.tick()
+
     except:
         traceback.print_exc()
     finally:
         pygame.quit()
-
 
 if __name__=="__main__":
     port = 24654
@@ -83,5 +151,3 @@ if __name__=="__main__":
         port = int(sys.argv[2])
 
     main(ip_address, port)
-
-    print('test')

@@ -1,171 +1,83 @@
-from multiprocessing import Process, Manager, Value, Lock
 from multiprocessing.connection import Listener
+from multiprocessing import Process, Manager, Value, Lock
 import traceback
 import sys
-import pygame
 
-WIDTH = 600
-HEIGHT = 600
-LINE_WIDTH = 10
-WIN_LINE_WIDTH = 5
-BOARD_ROWS = 10
-BOARD_COLS = 10
-SQUARE_SIZE = 60
-CIRCLE_RADIUS = 20
-CIRCLE_WIDTH = 5
-CROSS_WIDTH = 5
-SPACE = 55
+LEFT_PLAYER = 0
+RIGHT_PLAYER = 1
+SIDESSTR = ["one", "two"]
+SIZE = (505, 505)
+X=0
+Y=1
+DELTA = 30
 
-RED = (255, 0, 0)
-BG_COLOR = (20, 200, 160)
-LINE_COLOR = (23, 145, 135)
-CIRCLE_COLOR = (239, 231, 200)
-CROSS_COLOR = (66, 66, 66)
-
-
-
-def grid():
-    grid = []
-    for row in range(20):
-        grid.append([])
-        for column in range(20):
-            grid[row].append(0)
-    grid[1][5] = 0
-    window_size = [505, 505]
-
-class Board():
-    def __init__(self, velocity):
-        self.squares=[ SIZE[X]//2, SIZE[Y]//2 ]
-        self.velocity = velocity
-
-    def get_pos(self):
-        return self.pos
-
-    def update(self):
-        self.pos[X] += self.velocity[X]
-        self.pos[Y] += self.velocity[Y]
-
-    def bounce(self, AXIS):
-        self.velocity[AXIS] = -self.velocity[AXIS]
-
-    def collide_player(self, side):
-        self.bounce(X)
-        self.pos[X] += 3*self.velocity[X]
-        self.pos[Y] += 3*self.velocity[Y]
-
-
-class Game():
-    def __init__(self):
-        self.grid = grid()
-        self.score = [0, 0]
-        self.running = True
-        self.players = [Player(i) for i in range(2)]
-
-
-
-class Display():
-    def __init__(self, window_size):
-        self.screen = pygame.display.set_mode(window_size)
-        self.clock = pygame.time.Clock() #frames per second
-        pygame.init()
-
-    def analyze_events(self, player):
-
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
-            column = pos[0] // (WIDTH + MARGIN)
-            row = pos[1] // (HEIGHT + MARGIN)
-            grid[row][column] = 1
-
-        events = []
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.key == pygame.K_ESCAPE:
-                events.append("quit")
-                
-        if pygame.sprite.collide_rect(self.ball, self.paddles[side]):
-            events.append("collide")
-        return events
-
-
-FIRST_PLAYER = 0
-SECOND_PLAYER = 1
-RED= (255, 0, 0)
-BLUE = (0, 0, 255)
 WIDTH = 20
 HEIGHT = 20
 MARGIN = 5
-grid = []
 
-class Player():
-    def __init__(self, number):
-        self.number = number
-        if number == FIRST_PLAYER:
-            self.color = RED
-        else:
-            self.color = BLUE
-        self.counter = Value('i',0)
 
-    def get_color(self):
-        return self.color
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255,255,0)
+GREEN = (0,255,0)
 
-    def get_number(self):
-        return self.number
 
 class Game():
     def __init__(self, manager):
-        self.players = manager.list( [Player(FIRST_PLAYER), Player(SECOND_PLAYER)] )
-        self.score = manager.list( [] )
-        self.running = Value('i', 1) # 1 running
+        self.players = manager.list([Player(LEFT_PLAYER), Player(RIGHT_PLAYER)])
+        self.running = Value('i', 1)  # 1 running
         self.lock = Lock()
 
-    def get_player(self, number):
-        return self.players[number]
-        
-    def get_score(self):
-        return list(self.score)
 
-    def is_running(self):
-        return self.running.value == 1
+    def get_player(self, turn):
+        return self.players[turn]
 
     def stop(self):
         self.running.value = 0
 
     def get_info(self):
-        info = {
-            'score_first_player': self.players[LEFT_PLAYER].get_pos(),
-            'score_second_player': self.players[RIGHT_PLAYER].get_pos(),
-            'pos_ball': self.ball[0].get_pos(),
-            'score': list(self.score),
+        info = { #info who board looks now
             'is_running': self.running.value == 1
         }
         return info
 
+    def color_board(self): #needed?
+        print('')
 
-def player(number, conn, game):
+    def is_running(self):
+        return self.running.value == 1
+
+
+
+class Player():
+    def __init__(self, turn):
+        self.turn = turn
+
+
+
+
+
+def player(turn, conn, game):
     try:
-        print(f"starting player {SIDESSTR[number]}:{game.get_info()}")
-        conn.send( (number, game.get_info()) )
+        print(f"starting player {SIDESSTR[turn]}:{game.get_info()}")
+        conn.send( (turn, game.get_info()) )
         while game.is_running():
-            square = [None , None]
             command = ""
             while command != "next":
-                command, square = conn.recv()
-                if command == "click":
-                    update
+                command = conn.recv()
+                if command[0] == "color":
+                    print('change color on board')
+                    game.change_color(turn, command[1], command[2])
                 elif command == "quit":
                     game.stop()
-            if side == 1:
-                game.move_ball()
             conn.send(game.get_info())
     except:
         traceback.print_exc()
         conn.close()
     finally:
         print(f"Game ended {game}")
-
-
-
 
 def main(ip_address, port):
     manager = Manager()
@@ -190,6 +102,7 @@ def main(ip_address, port):
 
     except Exception as e:
         traceback.print_exc()
+
 
 if __name__=='__main__':
     port = 24654
