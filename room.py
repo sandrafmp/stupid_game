@@ -23,15 +23,17 @@ BLUE = (0, 0, 255)
 YELLOW = (255,255,0)
 GREEN = (0,255,0)
 
+"""
 class Board():
-	def __init__(self,dimension)
+	def __init__(self,dimension):
 		self.grid = []
+"""
 
 class Game():
     def __init__(self, manager):
         self.players = manager.list([Player(LEFT_PLAYER), Player(RIGHT_PLAYER)])
         self.running = Value('i', 1)  # 1 running
-        self.board = manager.list(Board())
+        self.board = manager.list([[]])
         self.lock = Lock()
 
 
