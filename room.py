@@ -7,33 +7,33 @@ LEFT_PLAYER = 0
 RIGHT_PLAYER = 1
 SIDESSTR = ["one", "two"]
 SIZE = (505, 505)
-X=0
-Y=1
+X = 0
+Y = 1
 DELTA = 30
 
 WIDTH = 20
 HEIGHT = 20
 MARGIN = 5
 
-
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-YELLOW = (255,255,0)
-GREEN = (0,255,0)
+YELLOW = (255, 255, 0)
+GREEN = (0, 255, 0)
+
 
 class Board():
-	def __init__(self,dimension)
-		self.grid = []
+    def __init__(self):
+        self.grid = []
+
 
 class Game():
     def __init__(self, manager):
         self.players = manager.list([Player(LEFT_PLAYER), Player(RIGHT_PLAYER)])
         self.running = Value('i', 1)  # 1 running
-        self.board = manager.list(Board())
+        self.board = manager.list([Board()])
         self.lock = Lock()
-
 
     def get_player(self, turn):
         return self.players[turn]
@@ -42,21 +42,20 @@ class Game():
         self.running.value = 0
 
     def get_info(self):
-        info = { #info who board looks now
-            'is_running': self.running.value == 1
-            'board': self.board
+        info = {  # info how board looks now
+            'is_running': self.running.value == 1,
+            'board': self.board[0].grid
         }
         return info
 
-    def color_board(self): #needed?
+    def color_board(self):  # needed?
         print('')
 
     def is_running(self):
         return self.running.value == 1
-        
-    def change_color(self, player, command1, command2):
-		self.board[command1][command2]=player+1
 
+    def change_color(self, player, command1, command2):
+        self.board.grid[command1][command2] = player + 1
 
 
 class Player():
@@ -67,7 +66,7 @@ class Player():
 def player(turn, conn, game):
     try:
         print(f"starting player {SIDESSTR[turn]}:{game.get_info()}")
-        conn.send( (turn, game.get_info()) )
+        conn.send((turn, game.get_info()))
         while game.is_running():
             command = ""
             while command != "next":
@@ -83,6 +82,7 @@ def player(turn, conn, game):
         conn.close()
     finally:
         print(f"Game ended {game}")
+
 
 def main(ip_address, port):
     manager = Manager()
@@ -109,10 +109,10 @@ def main(ip_address, port):
         traceback.print_exc()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     port = 24654
     ip_address = "127.0.0.1"
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         ip_address = sys.argv[1]
     if len(sys.argv) > 2:
         port = int(sys.argv[2])
