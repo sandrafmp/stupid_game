@@ -3,6 +3,25 @@ import traceback
 import pygame
 import sys, os
 
+WIDTH = 600
+HEIGHT = 600
+LINE_WIDTH = 10
+WIN_LINE_WIDTH = 5
+BOARD_ROWS = 10
+BOARD_COLS = 10
+SQUARE_SIZE = 60
+CIRCLE_RADIUS = 20
+CIRCLE_WIDTH = 5
+CROSS_WIDTH = 5
+SPACE = 55
+
+RED = (255, 0, 0)
+BG_COLOR = (20, 200, 160)
+LINE_COLOR = (23, 145, 135)
+CIRCLE_COLOR = (239, 231, 200)
+CROSS_COLOR = (66, 66, 66)
+
+
 class Display():
     def __init__(self, game):
         pygame.init()
@@ -11,7 +30,7 @@ class Display():
         events = []
         for event in pygame.event.get():
         	if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-        		events.append("square clicked")
+        		events.append("click")
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     events.append("restart")

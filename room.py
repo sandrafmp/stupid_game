@@ -4,15 +4,24 @@ import traceback
 import sys
 import pygame
 
+WIDTH = 600
+HEIGHT = 600
+LINE_WIDTH = 10
+WIN_LINE_WIDTH = 5
+BOARD_ROWS = 10
+BOARD_COLS = 10
+SQUARE_SIZE = 60
+CIRCLE_RADIUS = 20
+CIRCLE_WIDTH = 5
+CROSS_WIDTH = 5
+SPACE = 55
 
-black = (0, 0, 0)
-white = (255, 255, 255)
+RED = (255, 0, 0)
+BG_COLOR = (20, 200, 160)
+LINE_COLOR = (23, 145, 135)
+CIRCLE_COLOR = (239, 231, 200)
+CROSS_COLOR = (66, 66, 66)
 
-green = (0, 255, 0)
-blue = (0, 0, 255)
-WIDTH = 20
-HEIGHT = 20
-MARGIN = 5
 
 
 def grid():
@@ -23,6 +32,27 @@ def grid():
             grid[row].append(0)
     grid[1][5] = 0
     window_size = [505, 505]
+
+class Board():
+    def __init__(self, velocity):
+        self.squares=[ SIZE[X]//2, SIZE[Y]//2 ]
+        self.velocity = velocity
+
+    def get_pos(self):
+        return self.pos
+
+    def update(self):
+        self.pos[X] += self.velocity[X]
+        self.pos[Y] += self.velocity[Y]
+
+    def bounce(self, AXIS):
+        self.velocity[AXIS] = -self.velocity[AXIS]
+
+    def collide_player(self, side):
+        self.bounce(X)
+        self.pos[X] += 3*self.velocity[X]
+        self.pos[Y] += 3*self.velocity[Y]
+
 
 class Game():
     def __init__(self):
@@ -118,14 +148,11 @@ def player(number, conn, game):
         conn.send( (number, game.get_info()) )
         while game.is_running():
             square = [None , None]
+            command = ""
             while command != "next":
-                square = conn.recv()
-                if command == "up":
-                    game.moveUp(side)
-                elif command == "down":
-                    game.moveDown(side)
-                elif command == "collide":
-                    game.ball_collide(side)
+                command, square = conn.recv()
+                if command == "click":
+                    update
                 elif command == "quit":
                     game.stop()
             if side == 1:
