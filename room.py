@@ -24,13 +24,11 @@ GREEN = (0, 255, 0)
 
 
 class Board():
-	def __init__(self):
-		self.grid = []
-
     def __init__(self):
-        self.grid = []
-
-
+        self.grid = [[0]*20]*20
+    
+    def update(self, player, row, column):
+        self.grid[row][column]=player+1
 
 class Game():
     def __init__(self, manager):
@@ -38,11 +36,6 @@ class Game():
         self.running = Value('i', 1)  # 1 running
         self.board = manager.list([Board()])
         self.lock = Lock()
-
-	def initialize(self):
-		for i in range(20):
-			for j in range (20):
-				self.board.grid[i][j]=0
 
     def get_player(self, turn):
         return self.players[turn]
@@ -63,8 +56,12 @@ class Game():
     def is_running(self):
         return self.running.value == 1
         
-    def change_color(self, player, command1, command2):
-		self.board.grid[command1][command2]=player+1
+    def change_color(self, player, row, column):
+        self.lock.acquire()
+        board = self.board[0]
+        board.update(player, row, column)
+        self.board[0] = board
+        self.lock.release()
 
 
 class Player():
@@ -83,8 +80,10 @@ def player(turn, conn, game):
                 if command[0] == "color":
                     print('change color on board')
                     game.change_color(turn, command[1], command[2])
+                    print(turn,command[1],command[2])
                 elif command == "quit":
                     game.stop()
+            #print(game.get_info())
             conn.send(game.get_info())
     except:
         traceback.print_exc()
@@ -101,7 +100,6 @@ def main(ip_address, port):
             n_player = 0
             players = [None, None]
             game = Game(manager)
-            game.initialize
             while True:
                 print(f"accepting connection {n_player}")
                 conn = listener.accept()

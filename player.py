@@ -38,12 +38,12 @@ class Player():
     def __init__(self, turn): #turn är side
         self.turn = turn
 
-
 class Board():
     def __init__(self):
         self.grid = []
         self.scr = pygame.display.set_mode(SIZE)
-
+    
+    def initialize(self):
         for row in range(20):
             self.grid.append([])
             for column in range(20):
@@ -58,35 +58,36 @@ class Board():
         pygame.display.flip()
         self.clock =  pygame.time.Clock()  #FPS
         pygame.init()
-
+	
+		
     def analyze_events(self, turn):   #vi ska inte ändra planen i player utan endast skicka info till room
         events = []
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
+                print(pos)
                 column = pos[0] // (WIDTH + MARGIN)
                 row = pos[1] // (HEIGHT + MARGIN)
+                self.grid[row][column]=turn
                 events.append(["color", row, column])
+                print(row,column)
         return events
 
 
-    def change_color(self): #
+    def change_color(self): 
     	for i in range(20):
     		for j in range(20):
     			if self.grid[i][j]==1:
     				color=BLUE
-    				pygame.draw.rect(self.scr,color,[(MARGIN + WIDTH) * column + MARGIN,(MARGIN + HEIGHT) * row + MARGIN,WIDTH,HEIGHT])
+    				pygame.draw.rect(self.scr,color,[(MARGIN + WIDTH) * j + MARGIN,(MARGIN + HEIGHT) * i + MARGIN,WIDTH,HEIGHT])
     			elif self.grid[i][j]==2:
     				color=GREEN
     				pygame.draw.rect(self.scr,color,
-                         [(MARGIN + WIDTH) * column + MARGIN,
-                          (MARGIN + HEIGHT) * row + MARGIN,
+                         [(MARGIN + WIDTH) * j + MARGIN,
+                          (MARGIN + HEIGHT) * i + MARGIN,
                           WIDTH,
                           HEIGHT])
     	pygame.display.flip()
-
-    def update(self):
-        self.change_color()
 
     def refresh_board(self):
         pygame.display.update()
@@ -99,13 +100,22 @@ class Game():
     def __init__(self):
         self.running = True
         self.board = Board()
-
+    
+    def initialize(self):
+    	self.board.initialize()
+	
     def get_player(self, turn):
         return self.players[turn]
+        
+    def get_board(self):
+    	return self.board
+    	
+    def analyze_events(self, turn):
+    	return self.board.analyze_events(turn)
 
     def update(self, gameinfo):
         self.running = gameinfo['is_running']
-        self.board = self.up_board(gameinfo['board'])
+        self.up_board(gameinfo['board'])
     
     def up_board(self,info):
     	for i in range(20):
@@ -123,24 +133,24 @@ class Game():
 def main (ip_address, port):
     try:
         with Client((ip_address, port), authkey=b'secret password') as conn:
-            #display = Board()
             game = Game()
+            game.initialize()
             turn, gameinfo = conn.recv()
+            print("aa")
             print(f"I am playing {SIDESSTR[turn]}")
             game.update(gameinfo)
             while game.is_running():
-                events = display.analyze_events(turn)
+                events = game.analyze_events(turn)
                 for ev in events:
-                    print(turn)
-                    display.change_color(turn,ev[1],ev[2]) #DETTA SKA GÖRAS FÖR BÅDA, SÅ I RUM KANSKE? HAR PROVAT
                     conn.send(ev)
+                    #game.board.change_color()
                     if ev[0] == 'quit':
                         game.stop()
                 conn.send("next")
                 gameinfo = conn.recv()
                 game.update(gameinfo)
-                display.refresh_board()
-                display.tick()
+               	game.board.refresh_board()
+                game.board.tick()
 
     except:
         traceback.print_exc()
