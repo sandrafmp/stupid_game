@@ -23,19 +23,21 @@ BLUE = (0, 0, 255)
 YELLOW = (255,255,0)
 GREEN = (0,255,0)
 
-"""
 class Board():
-	def __init__(self,dimension):
+	def __init__(self):
 		self.grid = []
-"""
 
 class Game():
     def __init__(self, manager):
         self.players = manager.list([Player(LEFT_PLAYER), Player(RIGHT_PLAYER)])
         self.running = Value('i', 1)  # 1 running
-        self.board = manager.list([[]])
+        self.board = manager.list([Board()])
         self.lock = Lock()
 
+	def initialize(self)
+		for i in range(20):
+			for j in range (20):
+				self.board.grid[i][j]=0
 
     def get_player(self, turn):
         return self.players[turn]
@@ -46,7 +48,7 @@ class Game():
     def get_info(self):
         info = { #info who board looks now
             'is_running': self.running.value == 1
-            'board': self.board
+            'board': self.board[0].grid
         }
         return info
 
@@ -57,7 +59,7 @@ class Game():
         return self.running.value == 1
         
     def change_color(self, player, command1, command2):
-		self.board[command1][command2]=player+1
+		self.board.grid[command1][command2]=player+1
 
 
 
@@ -94,6 +96,7 @@ def main(ip_address, port):
             n_player = 0
             players = [None, None]
             game = Game(manager)
+            game.initialize
             while True:
                 print(f"accepting connection {n_player}")
                 conn = listener.accept()

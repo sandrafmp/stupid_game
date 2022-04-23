@@ -40,7 +40,7 @@ class Player():
 
 
 class Board():
-    def __init__(self, game):
+    def __init__(self):
         self.grid = []
         self.scr = pygame.display.set_mode(SIZE)
 
@@ -75,23 +75,15 @@ class Board():
     		for j in range(20):
     			if self.grid[i][j]==1:
     				color=BLUE
-    				pygame.draw.rect(self.scr,
-                         color,
+    				pygame.draw.rect(self.scr,color,[(MARGIN + WIDTH) * column + MARGIN,(MARGIN + HEIGHT) * row + MARGIN,WIDTH,HEIGHT])
+    			elif self.grid[i][j]==2:
+    				color=GREEN
+    				pygame.draw.rect(self.scr,color,
                          [(MARGIN + WIDTH) * column + MARGIN,
                           (MARGIN + HEIGHT) * row + MARGIN,
                           WIDTH,
                           HEIGHT])
-                if self.grid[i][j]==2:
-    				color=BLUE
-    				pygame.draw.rect(self.scr,
-                         color,
-                         [(MARGIN + WIDTH) * column + MARGIN,
-                          (MARGIN + HEIGHT) * row + MARGIN,
-                          WIDTH,
-                          HEIGHT])
-                          
-        # clock.tick(50)
-        pygame.display.flip()
+    	pygame.display.flip()
 
     def update(self):
         self.change_color()
@@ -114,13 +106,13 @@ class Game():
     def update(self, gameinfo):
         self.running = gameinfo['is_running']
         self.board = self.up_board(gameinfo['board'])
-
-	def up_board(self,info):
-		for i in range(20):
-			for j in range(20):
-				self.board.grid[i][j]=sala[i][j]
-		self.board.change_color()
-		
+    
+    def up_board(self,info):
+    	for i in range(20):
+    		for j in range(20):
+    			self.board.grid[i][j]=info[i][j]
+    	self.board.change_color()
+    
     def is_running(self):
         return self.running
 
@@ -131,8 +123,8 @@ class Game():
 def main (ip_address, port):
     try:
         with Client((ip_address, port), authkey=b'secret password') as conn:
-            display = Board()
-            game = Game(display)
+            #display = Board()
+            game = Game()
             turn, gameinfo = conn.recv()
             print(f"I am playing {SIDESSTR[turn]}")
             game.update(gameinfo)
