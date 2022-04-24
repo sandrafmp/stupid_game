@@ -23,10 +23,11 @@ GREEN = (0, 255, 0)
 
 class Board():
     def __init__(self):
-        self.grid = [[0]*BOARD_SIZE for _ in range(BOARD_SIZE)]
+        self.grid = [[0] * BOARD_SIZE for _ in range(BOARD_SIZE)]
 
     def update(self, player, row, column):
-        self.grid[row][column] = player+1
+        self.grid[row][column] = player + 1
+
 
 class Game():
     def __init__(self, manager):
@@ -34,6 +35,7 @@ class Game():
         self.running = Value('i', 1)  # 1 equals running
         self.board = manager.list([Board()])
         self.lock = Lock()
+        self.winner = False
 
     def get_player(self, turn):
         return self.players[turn]
@@ -44,13 +46,14 @@ class Game():
     def get_info(self):
         info = {
             'is_running': self.running.value == 1,
-            'board': self.board[0].grid
+            'board': self.board[0].grid,
+            'winner': self.winner
         }
         return info
 
     def is_running(self):
         return self.running.value == 1
-        
+
     def change_color(self, player, row, column):
         self.lock.acquire()
         board = self.board[0]
@@ -58,24 +61,69 @@ class Game():
         self.board[0] = board
         self.lock.release()
 
+    def check_winner(self, turn):
+        for col in range(BOARD_SIZE):
+            for i in range(BOARD_SIZE):
+                if self.board[0].grid[i][col] == turn + 1 and self.board[0].grid[i + 1][col] == turn + 1 and \
+                        self.board[0].grid[i + 2][col] == turn + 1 and self.board[0].grid[i + 3][col] == turn + 1 and \
+                        self.board[0].grid[i + 4][col] == turn + 1:
+                    # draw_vertical_winning_line(col, i, turn)
+                    print("wins in column")
+                    return True
+
+        for row in range(BOARD_SIZE):
+            for i in range(BOARD_SIZE):
+                if self.board[0].grid[row][i] == turn + 1 and self.board[0].grid[row][i + 1] == turn + 1 and \
+                        self.board[0].grid[row][i + 2] == turn + 1 and self.board[0].grid[row][i + 3] == turn + 1 and \
+                        self.board[0].grid[row][i + 4] == turn + 1:
+                    # draw_horizontal_winning_line(row, i, player)
+                    print("wins in row")
+                    return True
+
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if self.board[0].grid[i][j] == turn + 1 and self.board[0].grid[i + 1][j + 1] == turn + 1 and \
+                        self.board[0].grid[i + 2][j + 2] == turn + 1 and self.board[0].grid[i + 3][
+                    j + 3] == turn + 1 and \
+                        self.board[0].grid[i + 4][j + 4] == turn + 1:
+                    # draw_desc_diagonal(player, i, j)
+                    print("wins in diag desc")
+                    return True
+
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if self.board[0].grid[i][j] == turn + 1 and self.board[0].grid[i - 1][j + 1] == turn + 1 and \
+                        self.board[0].grid[i - 2][j + 2] == turn + 1 and self.board[0].grid[i - 3][
+                    j + 3] == turn + 1 and \
+                        self.board[0].grid[i - 4][j + 4] == turn + 1:
+                    # draw_asc_diagonal(player, i, j)
+                    print("wins in diag asc")
+                    return True
+
+        return False
+
 
 class Player():
     def __init__(self, turn):
         self.turn = turn
 
+
 def player(turn, conn, game):
     try:
         print(f"starting player {SIDESSTR[turn]}:{game.get_info()}")
-        conn.send((turn, game.get_info()))
+        conn.send((turn, game.get_info(), game.winner))
         while game.is_running():
             command = ""
             while command != "next":
                 command = conn.recv()
                 if command[0] == "color":
                     game.change_color(turn, command[1], command[2])
+                    game.winner = game.check_winner(turn)
+                    if game.winner == True:
+                        game.stop()
                 elif command == "quit":
                     game.stop()
-            conn.send(game.get_info())
+            conn.send((game.get_info(), game.winner))
     except:
         traceback.print_exc()
         conn.close()
@@ -109,7 +157,7 @@ def main(ip_address, port):
 
 
 if __name__ == '__main__':
-    port = 24655
+    port = 24656
     ip_address = "127.0.0.1"
     if len(sys.argv) > 1:
         ip_address = sys.argv[1]

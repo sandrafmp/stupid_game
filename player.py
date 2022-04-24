@@ -123,6 +123,9 @@ class Game():
 	def is_running(self):
 		return self.running
 
+	def stop(self):
+		self.running = False
+
 
 
 
@@ -132,7 +135,7 @@ def main (ip_address, port):
 		with Client((ip_address, port), authkey=b'secret password') as conn:
 			game = Game()
 			game.initialize()
-			turn, gameinfo = conn.recv()
+			turn, gameinfo, winner = conn.recv()
 			print(f"I am playing {SIDESSTR[turn]}")
 			game.update(gameinfo)
 			while game.is_running():
@@ -143,10 +146,13 @@ def main (ip_address, port):
 					if ev[0] == 'quit':
 						game.stop()
 				conn.send("next")
-				gameinfo = conn.recv()
+				gameinfo, winner = conn.recv()
 				game.update(gameinfo)
 				game.board.refresh_board()
 				game.board.tick()
+				if winner == True:
+					print('Player', turn + 1, 'wins!')
+					game.stop()
 
 	except:
 		traceback.print_exc()
@@ -154,7 +160,7 @@ def main (ip_address, port):
 		pygame.quit()
 
 if __name__=="__main__":
-	port = 24655
+	port = 24656
 	ip_address = "147.96.81.245"
 	if len(sys.argv)>1:
 		ip_address = sys.argv[1]
