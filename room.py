@@ -27,6 +27,9 @@ class Board():
 
     def update(self, player, row, column):
         self.grid[row][column] = player + 1
+        
+    def initialize(self):
+        self.grid = [[0] * BOARD_SIZE for _ in range(BOARD_SIZE)]
 
 
 class Game():
@@ -36,6 +39,15 @@ class Game():
         self.board = manager.list([Board()])
         self.lock = Lock()
         self.winner = False
+        self.restart = False
+
+    def initialize(self):
+        board=self.board[0]
+        winner=self.winner
+        board.initialize()
+        winner=False
+        self.board[0]=board
+        self.winner=winner
 
     def get_player(self, turn):
         return self.players[turn]
@@ -47,7 +59,8 @@ class Game():
         info = {
             'is_running': self.running.value == 1,
             'board': self.board[0].grid,
-            'winner': self.winner
+            'winner': self.winner,
+            'restart': self.restart
         }
         return info
 
@@ -111,19 +124,21 @@ class Player():
 def player(turn, conn, game):
     try:
         print(f"starting player {SIDESSTR[turn]}:{game.get_info()}")
-        conn.send((turn, game.get_info(), game.winner))
+        conn.send((turn, game.get_info()))
         while game.is_running():
             command = ""
             while command != "next":
                 command = conn.recv()
                 if command[0] == "color":
                     game.change_color(turn, command[1], command[2])
-                    game.winner = game.check_winner(turn)
-                    if game.winner == True:
-                        game.stop()
-                elif command == "quit":
+                elif command[0] == "quit":
                     game.stop()
-            conn.send((game.get_info(), game.winner))
+                elif command == "restart":
+                    game.initialize()
+                    restart=game.restart
+                    restart=True
+                    
+            conn.send((turn, game.get_info()))
     except:
         traceback.print_exc()
         conn.close()
@@ -156,12 +171,14 @@ def main(ip_address, port):
         traceback.print_exc()
 
 
+
 if __name__ == '__main__':
     port = 24656
-    ip_address = "127.0.0.1"
+    ip_address = "147.96.81.245"
     if len(sys.argv) > 1:
         ip_address = sys.argv[1]
     if len(sys.argv) > 2:
         port = int(sys.argv[2])
+    print(ip_address, port)
 
     main(ip_address, port)
