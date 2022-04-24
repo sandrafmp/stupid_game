@@ -22,6 +22,7 @@ CROSS_WIDTH = 5
 SPACE = 25
 
 RED = (255, 0, 0)
+WHITE = (255, 255, 255)
 BG_COLOR = (20, 200, 160)
 LINE_COLOR = (23, 145, 135)
 CIRCLE_COLOR = (239, 231, 200)
@@ -289,6 +290,14 @@ class Game():
 						self.board.grid[row][i + 2] == turn + 1 and self.board.grid[row][i + 3] == turn + 1 and \
 						self.board.grid[row][i + 4] == turn + 1:
 						self.board.draw_horizontal_winning_line(row, i, turn+1)
+						font = pygame.font.Font(None, 74)
+						text = font.render(f"Player {turn+1} wins!", 1, WHITE)
+						self.board.scr.blit(text, (130, 230))
+						font = pygame.font.Font(None, 40)
+						text = font.render(f"Press R for restart", 1, WHITE)
+						self.board.scr.blit(text, (170, 360))
+						text = font.render(f"Press ESC for quit", 1, WHITE)
+						self.board.scr.blit(text, (170, 330))
 						return True
 
 		for turn in range(0,2):		#check descending
