@@ -27,7 +27,7 @@ class Board():
 
     def update(self, player, row, column):
         self.grid[row][column] = player + 1
-        
+
     def initialize(self):
         self.grid = [[0] * BOARD_SIZE for _ in range(BOARD_SIZE)]
 
@@ -42,12 +42,12 @@ class Game():
         self.restart = manager.list([False])
 
     def initialize(self):
-        board=self.board[0]
-        winner=self.winner
+        board = self.board[0]
+        winner = self.winner
         board.initialize()
-        winner=False
-        self.board[0]=board
-        self.winner=winner
+        winner = False
+        self.board[0] = board
+        self.winner = winner
 
     def get_player(self, turn):
         return self.players[turn]
@@ -73,11 +73,12 @@ class Game():
         board.update(player, row, column)
         self.board[0] = board
         self.lock.release()
-        
-    def res(self,a):
-        restart= self.restart[0]
-        restart=a
-        self.restart[0]=restart
+
+    def res(self, a):
+        restart = self.restart[0]
+        restart = a
+        self.restart[0] = restart
+
 
 class Player():
     def __init__(self, turn):
@@ -133,9 +134,8 @@ def main(ip_address, port):
         traceback.print_exc()
 
 
-
 if __name__ == '__main__':
-    port = 24656
+    port = 24657
     ip_address = "147.96.81.245"
     if len(sys.argv) > 1:
         ip_address = sys.argv[1]
