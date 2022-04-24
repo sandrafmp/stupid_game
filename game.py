@@ -106,7 +106,7 @@ def draw_asc_diagonal(player, i, j):
 	elif player == 2:
 		color = CROSS_COLOR
 
-	pygame.draw.line( screen, color, (15+j*SQUARE_SIZE, HEIGHT//2 - 15+i*SQUARE_SIZE), (WIDTH//2 - 15+j*SQUARE_SIZE, 15+j*SQUARE_SIZE), WIN_LINE_WIDTH )
+	pygame.draw.line( screen, color, (15+j*SQUARE_SIZE, 45+i*SQUARE_SIZE), (WIDTH//2 - 15+j*SQUARE_SIZE, -HEIGHT//2 +75+i*SQUARE_SIZE), WIN_LINE_WIDTH )
 
 def draw_desc_diagonal(player, i, j):
 	if player == 1:
