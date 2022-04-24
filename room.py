@@ -39,7 +39,7 @@ class Game():
         self.board = manager.list([Board()])
         self.lock = Lock()
         self.winner = False
-        self.restart = False
+        self.restart = manager.list([False])
 
     def initialize(self):
         board=self.board[0]
@@ -60,7 +60,7 @@ class Game():
             'is_running': self.running.value == 1,
             'board': self.board[0].grid,
             'winner': self.winner,
-            'restart': self.restart
+            'restart': self.restart[0]
         }
         return info
 
@@ -73,8 +73,11 @@ class Game():
         board.update(player, row, column)
         self.board[0] = board
         self.lock.release()
-
-
+        
+    def res(self,a):
+        restart= self.restart[0]
+        restart=a
+        self.restart[0]=restart
 
 class Player():
     def __init__(self, turn):
@@ -90,14 +93,13 @@ def player(turn, conn, game):
             while command != "next":
                 command = conn.recv()
                 if command[0] == "color":
+                    game.res(False)
                     game.change_color(turn, command[1], command[2])
                 elif command[0] == "quit":
                     game.stop()
                 elif command == "restart":
                     game.initialize()
-                    restart=game.restart
-                    restart=True
-                    
+                    game.res(True)
             conn.send((turn, game.get_info()))
     except:
         traceback.print_exc()
