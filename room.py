@@ -3,17 +3,15 @@ from multiprocessing import Process, Manager, Value, Lock
 import traceback
 import sys
 
-LEFT_PLAYER = 0
-RIGHT_PLAYER = 1
+PLAYER_ONE = 0
+PLAYER_TWO = 1
 SIDESSTR = ["one", "two"]
 SIZE = (505, 505)
-X = 0
-Y = 1
-DELTA = 30
 
 WIDTH = 20
 HEIGHT = 20
 MARGIN = 5
+BOARD_SIZE = 20
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -25,15 +23,15 @@ GREEN = (0, 255, 0)
 
 class Board():
     def __init__(self):
-        self.grid = [[0]*20]*20
-    
+        self.grid = [[0]*BOARD_SIZE for _ in range(BOARD_SIZE)]
+
     def update(self, player, row, column):
-        self.grid[row][column]=player+1
+        self.grid[row][column] = player+1
 
 class Game():
     def __init__(self, manager):
-        self.players = manager.list([Player(LEFT_PLAYER), Player(RIGHT_PLAYER)])
-        self.running = Value('i', 1)  # 1 running
+        self.players = manager.list([Player(PLAYER_ONE), Player(PLAYER_TWO)])
+        self.running = Value('i', 1)  # 1 equals running
         self.board = manager.list([Board()])
         self.lock = Lock()
 
@@ -44,14 +42,11 @@ class Game():
         self.running.value = 0
 
     def get_info(self):
-        info = {  # info how board looks now
+        info = {
             'is_running': self.running.value == 1,
             'board': self.board[0].grid
         }
         return info
-
-    def color_board(self):  # needed?
-        print('')
 
     def is_running(self):
         return self.running.value == 1
@@ -68,7 +63,6 @@ class Player():
     def __init__(self, turn):
         self.turn = turn
 
-
 def player(turn, conn, game):
     try:
         print(f"starting player {SIDESSTR[turn]}:{game.get_info()}")
@@ -78,12 +72,9 @@ def player(turn, conn, game):
             while command != "next":
                 command = conn.recv()
                 if command[0] == "color":
-                    print('change color on board')
                     game.change_color(turn, command[1], command[2])
-                    print(turn,command[1],command[2])
                 elif command == "quit":
                     game.stop()
-            #print(game.get_info())
             conn.send(game.get_info())
     except:
         traceback.print_exc()
@@ -118,7 +109,7 @@ def main(ip_address, port):
 
 
 if __name__ == '__main__':
-    port = 24654
+    port = 24655
     ip_address = "127.0.0.1"
     if len(sys.argv) > 1:
         ip_address = sys.argv[1]
