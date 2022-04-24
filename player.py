@@ -68,7 +68,7 @@ class Board():
     		color = CROSS_COLOR
     	pygame.draw.line( self.scr, color, (15+j*SQUARE_SIZE, HEIGHT//4 - 15+i*SQUARE_SIZE), (WIDTH//4 - 15+j*SQUARE_SIZE, 15+i*SQUARE_SIZE), WIN_LINE_WIDTH )
     
-    def draw_desc_diagonal(player, i, j):
+    def draw_desc_diagonal(self, player, i, j):
     	if player == 1:
     		color = CIRCLE_COLOR
     	elif player == 2:
@@ -151,7 +151,7 @@ class Game():
     					return True
     				
     	for turn in range(0,2):
-    		for row in range (BOARD_SIZE):
+    		for i in range (4,BOARD_SIZE):
     			for j in range(BOARD_SIZE):
     				if self.board.grid[i][j] == turn + 1 and self.board.grid[i - 1][j + 1] == turn + 1 and \
     					self.board.grid[i - 2][j + 2] == turn + 1 and self.board.grid[i - 3][j + 3] == turn + 1 and \
@@ -207,7 +207,6 @@ def main (ip_address, port):
                 events = game.analyze_events(turn)
                 for ev in events:
                     conn.send(ev)
-                    print(gameinfo)
                     if ev == 'quit':
                     	game.stop()
                 conn.send("next")
