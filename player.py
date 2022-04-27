@@ -157,8 +157,8 @@ class Game():
 						return True
 
 		for turn in range(0,2):
-			for i in range(BOARD_SIZE):
-				for j in range(BOARD_SIZE):
+			for i in range(BOARD_SIZE-4):
+				for j in range(BOARD_SIZE-4):
 					if self.board.grid[i][j] == turn + 1 and self.board.grid[i + 1][j + 1] == turn + 1 and \
 						self.board.grid[i + 2][j + 2] == turn + 1 and self.board.grid[i + 3][j + 3] == turn + 1 and \
 						self.board.grid[i + 4][j + 4] == turn + 1:
@@ -168,7 +168,7 @@ class Game():
 
 		for turn in range(0,2):
 			for i in range (4,BOARD_SIZE):
-				for j in range(BOARD_SIZE):
+				for j in range(BOARD_SIZE-4):
 					if self.board.grid[i][j] == turn + 1 and self.board.grid[i - 1][j + 1] == turn + 1 and \
 						self.board.grid[i - 2][j + 2] == turn + 1 and self.board.grid[i - 3][j + 3] == turn + 1 and \
 						self.board.grid[i - 4][j + 4] == turn + 1:
