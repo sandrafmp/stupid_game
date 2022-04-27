@@ -137,7 +137,7 @@ class Game():
 	def check_winner(self):
 		for turn in range(0,2):
 			for col in range(BOARD_SIZE):
-				for i in range(BOARD_SIZE):
+				for i in range(BOARD_SIZE-4):
 					if self.board.grid[i][col] == turn + 1 and self.board.grid[i + 1][col] == turn + 1 and \
 						self.board.grid[i + 2][col] == turn + 1 and self.board.grid[i + 3][col] == turn + 1 and \
 						self.board.grid[i + 4][col] == turn + 1:
@@ -147,7 +147,7 @@ class Game():
 
 		for turn in range(0,2):
 			for row in range(BOARD_SIZE):
-				for i in range(BOARD_SIZE):
+				for i in range(BOARD_SIZE-4):
 					if self.board.grid[row][i] == turn + 1 and self.board.grid[row][i + 1] == turn + 1 and \
 						self.board.grid[row][i + 2] == turn + 1 and self.board.grid[row][i + 3] == turn + 1 and \
 						self.board.grid[row][i + 4] == turn + 1:
